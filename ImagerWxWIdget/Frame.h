@@ -12,7 +12,11 @@
 enum
 {
 	ID_Hello = 1,
-	ID_OpenFile = 2
+	ID_OpenFile = 2,
+	Filter1 = 3,
+	Filter2 = 4,
+	Filter3 = 5,
+	Filter4 = 6
 };
 
 class MyFrame : public wxFrame

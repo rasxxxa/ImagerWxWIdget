@@ -14,10 +14,19 @@ MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "HELLO WORLD", wxPoint(0, 0), wx
 	wxMenu* menuOpenFile = new wxMenu;
 	menuOpenFile->Append(wxID_OPEN);
 
+	wxMenu* menuFilters = new wxMenu;
+	//menuFilters->Append(wxID_FILE1);
+	menuFilters->Append(Filter1, "&Filter 1");
+	menuFilters->Append(Filter2, "&Filter 2");
+	menuFilters->Append(Filter3, "&Filter 3");
+	menuFilters->Append(Filter4, "&Filter 4");
+
+
 	wxMenuBar* menuBar = new wxMenuBar;
 	menuBar->Append(menuFile, "&File");
 	menuBar->Append(menuHelp, "&Help");
 	menuBar->Append(menuOpenFile, "&Open File");
+	menuBar->Append(menuFilters, "&Filters");
 
 	SetMenuBar(menuBar);
 	CreateStatusBar();
