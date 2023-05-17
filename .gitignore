@@ -55,6 +55,9 @@ nunit-*.xml
 [Rr]eleasePS/
 dlldata.c
 
+vcpkg_installed
+vcpkg_installed/
+
 # Benchmark Results
 BenchmarkDotNet.Artifacts/
 
