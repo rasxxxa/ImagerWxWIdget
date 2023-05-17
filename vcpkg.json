@@ -1,0 +1,7 @@
+{
+  "name": "Imager",
+  "version-string": "00000",
+  "dependencies": [
+    "wxwidgets"
+  ]
+}
