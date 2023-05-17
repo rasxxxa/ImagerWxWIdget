@@ -1,0 +1,9 @@
+Package: opengl
+Version: 2022-12-04
+Depends: opengl-registry
+Architecture: x64-windows
+Multi-Arch: same
+Abi: 4bb52af8a9eb19ca011d6577ed4468848d7ec42ad2b737b06fac8cc7899d01ee
+Description: Open Graphics Library (OpenGL)[3][4][5] is a cross-language, cross-platform application programming interface (API) for rendering 2D and 3D vector graphics.
+Type: Port
+Status: install ok half-installed

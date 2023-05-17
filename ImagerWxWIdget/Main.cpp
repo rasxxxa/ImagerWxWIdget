@@ -1,6 +1,6 @@
 #include "../Imager/RawImageHandler.h"
-
-auto main() -> int
+#include "App.h"
+auto main(int args, char**argc) -> int
 {
-	RawImageHandler imager;
+	App::Run(args, argc);
 }

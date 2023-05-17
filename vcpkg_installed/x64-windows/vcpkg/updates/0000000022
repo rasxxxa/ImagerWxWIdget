@@ -1,0 +1,10 @@
+Package: pcre2
+Version: 10.40
+Port-Version: 1
+Depends: bzip2, vcpkg-cmake, vcpkg-cmake-config, zlib
+Architecture: x64-windows
+Multi-Arch: same
+Abi: 6270aca6a0605cc68cb217a2e0189523fcc692d9abf61e3864a70a99bdf1adf2
+Description: Regular Expression pattern matching using the same syntax and semantics as Perl 5.
+Type: Port
+Status: install ok half-installed

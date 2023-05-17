@@ -1,0 +1,9 @@
+Package: nanosvg
+Version: 2022-04-29
+Depends: vcpkg-cmake
+Architecture: x64-windows
+Multi-Arch: same
+Abi: f41e886a9b4fb8b46983669f728d6610ae4dace032f6e8690acd8d609efb15e7
+Description: NanoSVG is a simple stupid single-header-file SVG parse. The output of the parser is a list of cubic bezier shapes..
+Type: Port
+Status: install ok half-installed

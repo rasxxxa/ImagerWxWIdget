@@ -1,0 +1,8 @@
+Package: tiff
+Feature: zip
+Depends: zlib
+Architecture: x64-windows
+Multi-Arch: same
+Description: Support ZIP/deflate compression in TIFF image files
+Type: Port
+Status: install ok installed

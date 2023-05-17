@@ -1,0 +1,11 @@
+Package: bzip2
+Version: 1.0.8
+Port-Version: 3
+Depends: vcpkg-cmake, vcpkg-cmake-config
+Architecture: x64-windows
+Multi-Arch: same
+Abi: 5cc7074bbd5e4dff43b37ed2d80260832d485dc7810a4ea0cf62357d41bc2cf6
+Description: bzip2 is a freely available, patent free, high-quality data compressor. It typically compresses files to within 10% to 15% of the best available techniques (the PPM family of statistical compressors), whilst being around twice as fast at compression and six times faster at decompression.
+Type: Port
+Default-Features: tool
+Status: install ok installed
