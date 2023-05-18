@@ -12,7 +12,7 @@ enum class ImageType
 
 struct Image
 {
-	std::vector<char> m_imageData;
+	std::vector<unsigned char> m_imageData;
 	unsigned int m_width;
 	unsigned int m_height;
 	unsigned long long m_size;
@@ -27,5 +27,6 @@ public:
 	RawImageHandler() = default;
 	[[nodiscard]]Image LoadImageFile(const std::string& path);
 	bool WriteImage(const Image& image) const;
+	std::pair<std::vector<unsigned char>, std::vector<unsigned char>> SeparateAlpha(Image& image);
 };
 

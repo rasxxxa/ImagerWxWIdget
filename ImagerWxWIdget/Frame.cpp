@@ -1,8 +1,11 @@
 #include "Frame.h"
 #include "../Imager/RawImageHandler.h"
 
+#include "wx/mstream.h"
+
 MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "HELLO WORLD", wxPoint(0, 0), wxSize(800,800))
 {
+	wxInitAllImageHandlers();
 	wxMenu* menuFile = new wxMenu;
 	menuFile->Append(ID_Hello, "&Hello...\tCtrl-H", "Help string shown in status bar for this menu item");
 	menuFile->AppendSeparator();
@@ -36,6 +39,10 @@ MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "HELLO WORLD", wxPoint(0, 0), wx
 	Bind(wxEVT_MENU, &MyFrame::OnAbout, this, wxID_ABOUT);
 	Bind(wxEVT_MENU, &MyFrame::OnExit, this, wxID_EXIT);
 	Bind(wxEVT_MENU, &MyFrame::OpenFile, this, wxID_OPEN);
+	Bind(wxEVT_MENU, &MyFrame::RunFilter, this, Filter1);
+	Bind(wxEVT_MENU, &MyFrame::RunFilter, this, Filter2);
+	Bind(wxEVT_MENU, &MyFrame::RunFilter, this, Filter3);
+	Bind(wxEVT_MENU, &MyFrame::RunFilter, this, Filter4);
 
 	m_imagePanel = new wxPanel(this);
 }
@@ -72,20 +79,52 @@ void MyFrame::OpenFile(wxCommandEvent& event)
 		// Get the selected file path
 		wxString filePath = openFileDialog.GetPath();
 		m_mainImageData = m_mainImageHandler.LoadImageFile(filePath.c_str().operator const char *());
-		
-		m_mainImage = wxImage((int)m_mainImageData.m_width, (int)m_mainImageData.m_height, (unsigned char*)m_mainImageData.m_imageData.data(), true);
-		m_mainImage.Rescale(600, 600, wxIMAGE_QUALITY_HIGH);
-		m_mainBitmap = wxBitmap(m_mainImage);
-		m_staticBitmap = new wxStaticBitmap(this, wxID_ANY, m_mainBitmap);
-		m_staticBitmap->SetSize(600, 600);
-		m_staticBitmap->SetPosition(wxPoint(0, 0));
-
-		// Resize the panel to fit the static bitmap
-		m_imagePanel->SetSize(m_staticBitmap->GetSize());
-
-		// Set the panel as the main window's sizer
-		SetSizer(new wxBoxSizer(wxVERTICAL));
-		GetSizer()->Add(m_imagePanel, 1, wxEXPAND);
+		SetImage();
 	}
+}
+
+void MyFrame::RunFilter(wxCommandEvent& event)
+{
+	if (m_mainImageData.m_imageData.empty())
+	{
+		std::cout << "Empty image " << std::endl;
+		assert(false);
+		return;
+	}
+	switch (event.GetId())
+	{
+	case Filter1: 
+	{
+		GrayFilter(m_mainImageData);
+	}break;
+	case Filter2: {}break;
+	case Filter3: {}break;
+	case Filter4: {}break;
+	default:
+		break;
+	}
+	SetImage();
+}
+
+#include <filesystem>
+
+void MyFrame::SetImage()
+{
+	auto x = m_mainImageHandler.SeparateAlpha(m_mainImageData);
+	m_mainImage = wxImage(m_mainImageData.m_width, m_mainImageData.m_height, x.first.data(), x.second.data(), true); // ANY => can load many image formats
+	//auto res = m_mainImage.LoadFile(m_mainImageData.path, wxBITMAP_TYPE_PNG_RESOURCE);
+
+	m_mainBitmap = wxBitmap(m_mainImage);
+
+	m_staticBitmap = new wxStaticBitmap(this, wxID_ANY, m_mainBitmap);
+	m_staticBitmap->SetSize(600, 600);
+	m_staticBitmap->SetPosition(wxPoint(0, 0));
+	m_staticBitmap->SetTransparent(wxByte(255));
+	// Resize the panel to fit the static bitmap
+	m_imagePanel->SetSize(m_staticBitmap->GetSize());
+
+	// Set the panel as the main window's sizer
+	SetSizer(new wxBoxSizer(wxVERTICAL));
+	GetSizer()->Add(m_imagePanel, 1, wxEXPAND);
 }
 

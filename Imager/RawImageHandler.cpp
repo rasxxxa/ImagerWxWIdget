@@ -41,7 +41,7 @@
     im.m_height = height;
     im.m_width = width;
     im.m_size = height * width * channels;
-    im.m_imageData = std::vector<char>(image, image + im.m_size);
+    im.m_imageData = std::vector<unsigned char>(image, image + im.m_size);
     im.type = type;
     im.path = path;
 
@@ -67,4 +67,28 @@ bool RawImageHandler::WriteImage(const Image& image) const
         break;
     }
     return false;
+}
+
+std::pair<std::vector<unsigned char>, std::vector<unsigned char>> RawImageHandler::SeparateAlpha(Image& image)
+{
+    std::vector<unsigned char> data, alpha;
+    data.resize(image.m_imageData.size() * 3 / 4);
+    alpha.resize(image.m_imageData.size() / 4);
+
+    size_t countData = 0, countAlpha = 0;
+
+    for (auto pix = 0; pix < image.m_imageData.size(); pix++)
+    {
+        if ((pix + 1) % 4 == 0)
+        {
+            alpha[countAlpha++] = image.m_imageData[pix];
+        }
+        else
+        {
+            data[countData++] = image.m_imageData[pix];
+        }
+    }
+    
+    return std::make_pair(data, alpha);
+
 }

@@ -9,6 +9,8 @@
 #include <memory>
 #include "../Imager/RawImageHandler.h"
 
+import Filters;
+
 enum
 {
 	ID_Hello = 1,
@@ -35,4 +37,6 @@ private:
 	void OnExit(wxCommandEvent& event);
 	void OnClickHandler(wxCommandEvent& event);
 	void OpenFile(wxCommandEvent& event);
+	void RunFilter(wxCommandEvent& event);
+	void SetImage();
 };
