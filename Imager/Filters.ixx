@@ -30,6 +30,27 @@ export
 		}
 	}
 
+	void BlackAndWhite(Image& image, unsigned left, unsigned right, unsigned bitOffset)
+	{
+		auto& data = image.m_imageData;
+		std::cout << &data << std::endl;
+		for (unsigned pix = left; pix < right; pix += (4 * bitOffset))
+		{
+			unsigned int val = data[pix] + data[pix + 1] + data[pix + 2];
+
+			val /= 3;
+
+			unsigned char color = val < 128 ? 255 : 0;
+
+			data[pix] = color;
+			data[pix + 1] = color;
+			data[pix + 2] = color;
+
+			//data[pix + 3] = color;
+		}
+	}
+
+
 	void ThreadDivisionOfFunction(Image& image, bool useMatrixFormat, size_t bitOffset, const std::function<void(Image&, unsigned, unsigned, unsigned)>& function)
 	{
 		std::vector<std::jthread> threads;

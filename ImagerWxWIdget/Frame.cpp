@@ -20,7 +20,7 @@ MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "HELLO WORLD", wxPoint(0, 0), wx
 	wxMenu* menuFilters = new wxMenu;
 	//menuFilters->Append(wxID_FILE1);
 	menuFilters->Append(Filter1, "&Gray Scale filter");
-	menuFilters->Append(Filter2, "&Filter 2");
+	menuFilters->Append(Filter2, "&Black and white");
 	menuFilters->Append(Filter3, "&Filter 3");
 	menuFilters->Append(Filter4, "&Filter 4");
 
@@ -98,7 +98,11 @@ void MyFrame::RunFilter(wxCommandEvent& event)
 		std::cout << &m_mainImageData.m_imageData<< std::endl;
 		ThreadDivisionOfFunction(std::ref(m_mainImageData), false, 1, GrayFilter);
 	}break;
-	case Filter2: {}break;
+	case Filter2: {
+	
+		ThreadDivisionOfFunction(std::ref(m_mainImageData), false, 1, BlackAndWhite);
+	
+	}break;
 	case Filter3: {}break;
 	case Filter4: {}break;
 	default:
