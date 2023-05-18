@@ -114,6 +114,7 @@ void MyFrame::SetImage()
 	m_mainImage = wxImage(m_mainImageData.m_width, m_mainImageData.m_height, x.first.data(), x.second.data(), true); // ANY => can load many image formats
 	//auto res = m_mainImage.LoadFile(m_mainImageData.path, wxBITMAP_TYPE_PNG_RESOURCE);
 
+	m_mainImage.Rescale(600, 600, wxIMAGE_QUALITY_HIGH);
 	m_mainBitmap = wxBitmap(m_mainImage);
 
 	m_staticBitmap = new wxStaticBitmap(this, wxID_ANY, m_mainBitmap);
