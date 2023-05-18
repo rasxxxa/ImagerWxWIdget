@@ -17,6 +17,8 @@ export
 		unsigned char A;
 	};
 
+	using MATRIX = std::vector<std::vector<RGB>>;
+
 	void GrayFilter(Image& image, unsigned left, unsigned right, unsigned bitOffset)
 	{
 		auto& data = image.m_imageData;
@@ -50,8 +52,52 @@ export
 		}
 	}
 
+	void Pixelate(Image& image, unsigned startI, unsigned endI, unsigned startJ, unsigned endJ, unsigned sampleSize, MATRIX& matrix)
+	{
+		for (unsigned i = startI; i < endI; i += sampleSize)
+		{
+			for (unsigned j = startJ; j < endJ; j += sampleSize)
+			{
+				unsigned long resultR = 0;
+				unsigned long resultG = 0;
+				unsigned long resultB = 0;
+				unsigned long resultA = 0;
 
-	void ThreadDivisionOfFunction(Image& image, bool useMatrixFormat, size_t bitOffset, const std::function<void(Image&, unsigned, unsigned, unsigned)>& function)
+				for (unsigned k = i; k < endI && k < (k + sampleSize); k++)
+				{
+					for (unsigned l = j; l < endJ && l < (l + sampleSize); l++)
+					{
+						resultR += image.m_imageData[image.m_width * k + l];
+						resultG += image.m_imageData[image.m_width * k + l + 1];
+						resultB += image.m_imageData[image.m_width * k + l + 2];
+						resultA += image.m_imageData[image.m_width * k + l + 3];
+					}
+				}
+
+				resultR /= sampleSize;
+				resultG /= sampleSize;
+				resultB /= sampleSize;
+				resultA /= sampleSize;
+
+				for (unsigned k = i; k < endI && k < (k + sampleSize); k++)
+				{
+					for (unsigned l = j; l < endJ && l < (l + sampleSize); l++)
+					{
+						image.m_imageData[image.m_width * k + l    ] = resultR;
+						image.m_imageData[image.m_width * k + l + 1] = resultG;
+						image.m_imageData[image.m_width * k + l + 2] = resultB;
+						image.m_imageData[image.m_width * k + l + 3] = resultA;
+					}
+				}
+
+			}
+		}
+	}
+
+	using MatrixFunc = std::function<void(Image&, unsigned, unsigned, unsigned, unsigned, unsigned, MATRIX&)>;
+	using ArrayFunc = std::function<void(Image&, unsigned, unsigned, unsigned)>;
+
+	void ThreadDivisionOfFunction(Image& image, bool useMatrixFormat, size_t bitOffset, const MatrixFunc& function, const ArrayFunc& arrayFunction)
 	{
 		std::vector<std::jthread> threads;
 		threads.reserve(MAX_NUMBER_OF_THREADS);
@@ -74,6 +120,49 @@ export
 					j = 0;
 				}
 			}
+
+			unsigned int perThreadI = matrix[0].size() / sqrt(MAX_NUMBER_OF_THREADS);
+			unsigned int perThreadJ = matrix.size() / sqrt(MAX_NUMBER_OF_THREADS);
+
+			for (unsigned int threadI = 0; threadI < sqrt(MAX_NUMBER_OF_THREADS); threadI++)
+			{
+				for (unsigned int threadJ = 0; threadJ < sqrt(MAX_NUMBER_OF_THREADS); threadJ++)
+				{
+					unsigned int startI, startJ, endI, endJ;
+					startI = threadI * perThreadI;
+					startJ = threadJ * perThreadJ;
+
+					endI = (threadI + 1) * perThreadI;
+					endJ = (threadJ + 1) * perThreadJ;
+
+					if (threadI == 2)
+						endI = matrix[0].size();
+
+					if (threadJ == 2)
+						endJ == matrix.size();
+
+					std::jthread thread([&, i = startI, j = startJ, o = bitOffset, eI = endI, eJ = endJ]() 
+						{
+							function(std::ref(image), i, j, eI, eJ, o, std::ref(matrix));
+						});
+					threads.push_back(std::move(thread));
+				}
+			}
+			for (auto& th : threads)
+				th.join();
+
+			for (unsigned i = 0; i < matrix.size(); i++)
+			{
+				for (unsigned j = 0; j < matrix[0].size(); j++)
+				{
+					auto elem = i * matrix.size() + j;
+					image.m_imageData[elem] = matrix[i][j].R;
+					image.m_imageData[elem + 1] = matrix[i][j].G;
+					image.m_imageData[elem + 2] = matrix[i][j].B;
+					image.m_imageData[elem + 3] = matrix[i][j].A;
+				}
+			}
+
 		}
 		else
 		{
@@ -86,13 +175,13 @@ export
 				unsigned leftLimit = thr * elemsPerThread * 4;
 				std::jthread th([&, l = leftLimit, r = rightLimit, b = bitOffset]() {
 					
-					function(std::ref(image), l, r, b);
+					arrayFunction(std::ref(image), l, r, b);
 					
 					});
 				threads.push_back(std::move(th));
 			}
+			for (auto& th : threads)
+				th.join();
 		}
-		for (auto& th : threads)
-			th.join();
 	}
 }

@@ -96,14 +96,18 @@ void MyFrame::RunFilter(wxCommandEvent& event)
 	case Filter1: 
 	{
 		std::cout << &m_mainImageData.m_imageData<< std::endl;
-		ThreadDivisionOfFunction(std::ref(m_mainImageData), false, 1, GrayFilter);
+		ThreadDivisionOfFunction(std::ref(m_mainImageData), false, 40, nullptr, GrayFilter);
 	}break;
 	case Filter2: {
 	
-		ThreadDivisionOfFunction(std::ref(m_mainImageData), false, 1, BlackAndWhite);
+		ThreadDivisionOfFunction(std::ref(m_mainImageData), false, 1, nullptr, BlackAndWhite);
 	
 	}break;
-	case Filter3: {}break;
+	case Filter3: {
+	
+		ThreadDivisionOfFunction(std::ref(m_mainImageData), true, 1, Pixelate, nullptr);
+	
+	}break;
 	case Filter4: {}break;
 	default:
 		break;
