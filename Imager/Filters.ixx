@@ -4,7 +4,7 @@
 
 
 export module Filters;
-
+std::atomic_int it = 0;
 export
 {
 	constexpr size_t MAX_NUMBER_OF_THREADS = 4;
@@ -62,7 +62,7 @@ export
 				unsigned long resultG = 0;
 				unsigned long resultB = 0;
 				unsigned long resultA = 0;
-
+				it += 1;
 				for (unsigned k = i; k < endI && k < (k + sampleSize); k++)
 				{
 					for (unsigned l = j; l < endJ && l < (l + sampleSize); l++)
@@ -141,9 +141,9 @@ export
 					if (threadJ == 2)
 						endJ == matrix.size();
 
-					std::jthread thread([&, i = startI, j = startJ, o = bitOffset, eI = endI, eJ = endJ]() 
+					std::jthread thread([&, i = startI, j = startJ, o = size_t(bitOffset), eI = endI, eJ = endJ]() 
 						{
-							function(std::ref(image), i, j, eI, eJ, o, std::ref(matrix));
+							function(std::ref(image), i, eI, j, eJ, o, std::ref(matrix));
 						});
 					threads.push_back(std::move(thread));
 				}
@@ -162,6 +162,7 @@ export
 					image.m_imageData[elem + 3] = matrix[i][j].A;
 				}
 			}
+			std::cout << "Iterations: " << it;
 
 		}
 		else
