@@ -19,7 +19,7 @@ MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "HELLO WORLD", wxPoint(0, 0), wx
 
 	wxMenu* menuFilters = new wxMenu;
 	//menuFilters->Append(wxID_FILE1);
-	menuFilters->Append(Filter1, "&Filter 1");
+	menuFilters->Append(Filter1, "&Gray Scale filter");
 	menuFilters->Append(Filter2, "&Filter 2");
 	menuFilters->Append(Filter3, "&Filter 3");
 	menuFilters->Append(Filter4, "&Filter 4");
@@ -95,7 +95,8 @@ void MyFrame::RunFilter(wxCommandEvent& event)
 	{
 	case Filter1: 
 	{
-		GrayFilter(m_mainImageData);
+		std::cout << &m_mainImageData.m_imageData<< std::endl;
+		ThreadDivisionOfFunction(std::ref(m_mainImageData), false, 1, GrayFilter);
 	}break;
 	case Filter2: {}break;
 	case Filter3: {}break;
@@ -103,6 +104,7 @@ void MyFrame::RunFilter(wxCommandEvent& event)
 	default:
 		break;
 	}
+	m_mainImageHandler.WriteImage(m_mainImageData);
 	SetImage();
 }
 
@@ -115,8 +117,10 @@ void MyFrame::SetImage()
 	//auto res = m_mainImage.LoadFile(m_mainImageData.path, wxBITMAP_TYPE_PNG_RESOURCE);
 
 	m_mainImage.Rescale(600, 600, wxIMAGE_QUALITY_HIGH);
-	m_mainBitmap = wxBitmap(m_mainImage);
+	if (m_staticBitmap)
+		delete m_staticBitmap;
 
+	m_mainBitmap = wxBitmap(m_mainImage);
 	m_staticBitmap = new wxStaticBitmap(this, wxID_ANY, m_mainBitmap);
 	m_staticBitmap->SetSize(600, 600);
 	m_staticBitmap->SetPosition(wxPoint(0, 0));
@@ -127,5 +131,6 @@ void MyFrame::SetImage()
 	// Set the panel as the main window's sizer
 	SetSizer(new wxBoxSizer(wxVERTICAL));
 	GetSizer()->Add(m_imagePanel, 1, wxEXPAND);
+	Refresh(true);
 }
 
