@@ -26,6 +26,7 @@ class MyFrame : public wxFrame
 public:
 	MyFrame();
 private:
+	wxSpinCtrl* c1, * c2, *c3;
 	wxImage m_mainImage;
 	wxBitmap m_mainBitmap;
 	wxStaticBitmap* m_staticBitmap;
@@ -38,5 +39,5 @@ private:
 	void OnClickHandler(wxCommandEvent& event);
 	void OpenFile(wxCommandEvent& event);
 	void RunFilter(wxCommandEvent& event);
-	void SetImage();
+	void SetImage(Image* image = nullptr);
 };

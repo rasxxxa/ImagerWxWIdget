@@ -92,3 +92,44 @@ std::pair<std::vector<unsigned char>, std::vector<unsigned char>> RawImageHandle
     return std::make_pair(data, alpha);
 
 }
+
+MATRIX RawImageHandler::CreateMatrixFromImage(const Image& image)
+{
+    MATRIX matrix(image.m_height, std::vector<RGB>(image.m_width, RGB()));
+    unsigned i = 0, j = 0;
+    for (unsigned long pix = 0; pix < image.m_imageData.size(); pix += 4)
+    {
+        RGB t;
+        t.R = image.m_imageData[pix];
+        t.G = image.m_imageData[pix + 1];
+        t.B = image.m_imageData[pix + 2];
+        t.A = image.m_imageData[pix + 3];
+        matrix[i][j++] = t;
+        if (j == image.m_width)
+        {
+            i++;
+            j = 0;
+        }
+    }
+
+    return matrix;
+}
+
+
+
+IMAGEDATA RawImageHandler::CreateImageFromMatrix(const MATRIX& matrix)
+{
+    IMAGEDATA data(matrix.size() * matrix[0].size() * (sizeof(RGB)));
+    unsigned int elem = 0;
+    for (unsigned long row = 0; row < matrix.size(); row++)
+    {
+        for (unsigned long column = 0; column < matrix[0].size(); column++)
+        {
+            data[elem++] = matrix[row][column].R;
+            data[elem++] = matrix[row][column].G;
+            data[elem++] = matrix[row][column].B;
+            data[elem++] = matrix[row][column].A;
+        }
+    }
+    return data;
+}

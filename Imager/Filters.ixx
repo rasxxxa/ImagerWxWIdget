@@ -1,5 +1,6 @@
 #include "RawImageHandler.h"
 #include <thread>
+#include <cassert>
 #include <functional>
 
 
@@ -9,21 +10,10 @@ export
 {
 	constexpr size_t MAX_NUMBER_OF_THREADS = 4;
 
-	struct RGB
-	{
-		unsigned char R;
-		unsigned char G;
-		unsigned char B;
-		unsigned char A;
-	};
-
-	using MATRIX = std::vector<std::vector<RGB>>;
-
 	void GrayFilter(Image& image, unsigned left, unsigned right, unsigned bitOffset)
 	{
 		auto& data = image.m_imageData;
-		std::cout << &data << std::endl;
-		for (unsigned pix = left; pix < right; pix += (4 * bitOffset))
+		for (unsigned pix = left; pix < right && pix + 4 * bitOffset < right; pix += (4 * bitOffset))
 		{
 			unsigned char val = data[pix] * 0.11f + data[pix + 1] * 0.66f + data[pix + 2] * 0.23f;
 			data[pix] = val;
@@ -32,11 +22,23 @@ export
 		}
 	}
 
+	void RecolorOfGrayAndWhite(Image& image, float percentageR, float percentageG, float percentageB, unsigned bitOffset)
+	{
+		auto& data = image.m_imageData;
+		for (unsigned pix = 0; pix < image.m_imageData.size() && pix + 4 * bitOffset < image.m_imageData.size(); pix += (4 * bitOffset))
+		{
+			auto val = data[pix];
+			data[pix] = val * percentageR;
+			data[pix + 1] = val * percentageG;
+			data[pix + 2] = val * percentageB;
+		}
+	}
+
 	void BlackAndWhite(Image& image, unsigned left, unsigned right, unsigned bitOffset)
 	{
 		auto& data = image.m_imageData;
 		std::cout << &data << std::endl;
-		for (unsigned pix = left; pix < right; pix += (4 * bitOffset))
+		for (unsigned pix = left; pix < right && pix + 4 * bitOffset < right; pix += (4 * bitOffset))
 		{
 			unsigned int val = data[pix] + data[pix + 1] + data[pix + 2];
 
@@ -47,51 +49,53 @@ export
 			data[pix] = color;
 			data[pix + 1] = color;
 			data[pix + 2] = color;
-
-			//data[pix + 3] = color;
+			data[pix + 3] = color;
 		}
 	}
 
-	void Pixelate(Image& image, unsigned startI, unsigned endI, unsigned startJ, unsigned endJ, unsigned sampleSize, MATRIX& matrix)
+	void Pixelate(Image& image, size_t sampleSize, MATRIX& matrix)
 	{
-		for (unsigned i = startI; i < endI; i += sampleSize)
+		MATRIX m = RawImageHandler::CreateMatrixFromImage(image);
+
+		for (size_t i = 0; i < matrix.size(); i += sampleSize)
 		{
-			for (unsigned j = startJ; j < endJ; j += sampleSize)
+			for (size_t j = 0; j < matrix[0].size(); j += sampleSize)
 			{
 				unsigned long resultR = 0;
 				unsigned long resultG = 0;
 				unsigned long resultB = 0;
 				unsigned long resultA = 0;
-				it += 1;
-				for (unsigned k = i; k < endI && k < (k + sampleSize); k++)
+				unsigned long sampled = 0;
+				for (size_t k = i; k < matrix.size() && k < (i + sampleSize); k++)
 				{
-					for (unsigned l = j; l < endJ && l < (l + sampleSize); l++)
+					for (size_t l = j; l < matrix[0].size() && l < (j + sampleSize); l++)
 					{
-						resultR += image.m_imageData[image.m_width * k + l];
-						resultG += image.m_imageData[image.m_width * k + l + 1];
-						resultB += image.m_imageData[image.m_width * k + l + 2];
-						resultA += image.m_imageData[image.m_width * k + l + 3];
+						resultR += matrix[k][l].R;
+						resultG += matrix[k][l].G;
+						resultB += matrix[k][l].B;
+						resultA += matrix[k][l].A;
+						sampled++;
 					}
 				}
 
-				resultR /= sampleSize;
-				resultG /= sampleSize;
-				resultB /= sampleSize;
-				resultA /= sampleSize;
+				resultR /= sampled;
+				resultG /= sampled;
+				resultB /= sampled;
+				resultA /= sampled;
 
-				for (unsigned k = i; k < endI && k < (k + sampleSize); k++)
+				for (size_t k = i; k < matrix.size() && k < (i + sampleSize); k++)
 				{
-					for (unsigned l = j; l < endJ && l < (l + sampleSize); l++)
+					for (size_t l = j; l < matrix[0].size() && l < (j + sampleSize); l++)
 					{
-						image.m_imageData[image.m_width * k + l    ] = resultR;
-						image.m_imageData[image.m_width * k + l + 1] = resultG;
-						image.m_imageData[image.m_width * k + l + 2] = resultB;
-						image.m_imageData[image.m_width * k + l + 3] = resultA;
+						m[k][l].R = resultR;
+						m[k][l].G = resultG;
+						m[k][l].B = resultB;
+						m[k][l].A = resultA;
 					}
 				}
-
 			}
 		}
+		matrix = MATRIX(m);
 	}
 
 	using MatrixFunc = std::function<void(Image&, unsigned, unsigned, unsigned, unsigned, unsigned, MATRIX&)>;

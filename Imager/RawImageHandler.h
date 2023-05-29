@@ -10,9 +10,20 @@ enum class ImageType
 	BMP,
 };
 
+struct RGB
+{
+	unsigned char R;
+	unsigned char G;
+	unsigned char B;
+	unsigned char A;
+};
+
+using MATRIX = std::vector<std::vector<RGB>>;
+using IMAGEDATA = std::vector<unsigned char>;
+
 struct Image
 {
-	std::vector<unsigned char> m_imageData;
+	IMAGEDATA m_imageData;
 	unsigned int m_width;
 	unsigned int m_height;
 	unsigned long long m_size;
@@ -28,5 +39,9 @@ public:
 	[[nodiscard]]Image LoadImageFile(const std::string& path);
 	bool WriteImage(const Image& image) const;
 	std::pair<std::vector<unsigned char>, std::vector<unsigned char>> SeparateAlpha(Image& image);
+
+	static MATRIX CreateMatrixFromImage(const Image& image);
+	static IMAGEDATA CreateImageFromMatrix(const MATRIX& matrix);
+
 };
 

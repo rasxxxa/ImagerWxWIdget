@@ -1,6 +1,6 @@
 #include "Frame.h"
 #include "../Imager/RawImageHandler.h"
-
+#include "wx/spinctrl.h"
 #include "wx/mstream.h"
 
 MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "HELLO WORLD", wxPoint(0, 0), wxSize(800,800))
@@ -43,6 +43,10 @@ MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "HELLO WORLD", wxPoint(0, 0), wx
 	Bind(wxEVT_MENU, &MyFrame::RunFilter, this, Filter2);
 	Bind(wxEVT_MENU, &MyFrame::RunFilter, this, Filter3);
 	Bind(wxEVT_MENU, &MyFrame::RunFilter, this, Filter4);
+
+	c1 = new wxSpinCtrl(this, 10, "", wxPoint(600, 0), wxSize(100, 20), 16384L, 0, 100);
+	c2 = new wxSpinCtrl(this, 11, "", wxPoint(600, 200), wxSize(100, 20), 16384L, 0, 100);
+	c3 = new wxSpinCtrl(this, 12, "", wxPoint(600, 400), wxSize(100, 20), 16384L, 0, 100);
 
 	m_imagePanel = new wxPanel(this);
 }
@@ -95,33 +99,51 @@ void MyFrame::RunFilter(wxCommandEvent& event)
 	{
 	case Filter1: 
 	{
-		std::cout << &m_mainImageData.m_imageData<< std::endl;
-		ThreadDivisionOfFunction(std::ref(m_mainImageData), false, 5, nullptr, GrayFilter);
+		GrayFilter(m_mainImageData, 0, m_mainImageData.m_imageData.size(), 1);
 	}break;
 	case Filter2: {
 	
-		ThreadDivisionOfFunction(std::ref(m_mainImageData), false, 3, nullptr, BlackAndWhite);
+		BlackAndWhite((m_mainImageData), 0, m_mainImageData.m_imageData.size(), 1);
 	
 	}break;
 	case Filter3: {
 	
-		ThreadDivisionOfFunction(std::ref(m_mainImageData), true, 30, Pixelate, nullptr);
+		auto m = RawImageHandler::CreateMatrixFromImage(m_mainImageData);
+		Pixelate(m_mainImageData, 4, m);
+		m_mainImageData.m_imageData = RawImageHandler::CreateImageFromMatrix(m);
+		Image m1(m_mainImageData);
+		SetImage(&m1);
+		return;
 	
 	}break;
-	case Filter4: {}break;
+	case Filter4: {
+	
+		float pR = float(c1->GetValue()) / 100.0f;
+		float pG = float(c2->GetValue()) / 100.0f;
+		float pB = float(c3->GetValue()) / 100.0f;
+
+		RecolorOfGrayAndWhite(m_mainImageData, pR, pG, pB, 1);
+
+	}break;
 	default:
 		break;
 	}
-	m_mainImageHandler.WriteImage(m_mainImageData);
+	//m_mainImageHandler.WriteImage(m_mainImageData);
 	SetImage();
 }
 
 #include <filesystem>
 
-void MyFrame::SetImage()
+void MyFrame::SetImage(Image* image)
 {
-	auto x = m_mainImageHandler.SeparateAlpha(m_mainImageData);
-	m_mainImage = wxImage(m_mainImageData.m_width, m_mainImageData.m_height, x.first.data(), x.second.data(), true); // ANY => can load many image formats
+	Image* m;
+	if (!image)
+		m = &m_mainImageData;
+	else
+		m = image;
+
+	auto x = m_mainImageHandler.SeparateAlpha(*m);
+	m_mainImage = wxImage(m->m_width, m->m_height, x.first.data(), x.second.data(), true); // ANY => can load many image formats
 	//auto res = m_mainImage.LoadFile(m_mainImageData.path, wxBITMAP_TYPE_PNG_RESOURCE);
 
 	m_mainImage.Rescale(600, 600, wxIMAGE_QUALITY_HIGH);
