@@ -24,12 +24,18 @@ MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "HELLO WORLD", wxPoint(0, 0), wx
 	menuFilters->Append(Filter3, "&Filter 3");
 	menuFilters->Append(Filter4, "&Filter 4");
 
+	wxMenu* menuOptions = new wxMenu;
+	menuOptions->Append(Option1, "&Option 1");
+	menuOptions->Append(Option2, "&Option 2");
+	menuOptions->Append(Option3, "&Option 3");
+	menuOptions->Append(Option4, "&Option 4");
 
 	wxMenuBar* menuBar = new wxMenuBar;
 	menuBar->Append(menuFile, "&File");
 	menuBar->Append(menuHelp, "&Help");
 	menuBar->Append(menuOpenFile, "&Open File");
 	menuBar->Append(menuFilters, "&Filters");
+	menuBar->Append(menuOptions, "&Options");
 
 	SetMenuBar(menuBar);
 	CreateStatusBar();
@@ -44,13 +50,34 @@ MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "HELLO WORLD", wxPoint(0, 0), wx
 	Bind(wxEVT_MENU, &MyFrame::RunFilter, this, Filter3);
 	Bind(wxEVT_MENU, &MyFrame::RunFilter, this, Filter4);
 
-	c1 = new wxSpinCtrl(this, 10, "", wxPoint(600, 0), wxSize(100, 20), 16384L, 0, 100);
-	c2 = new wxSpinCtrl(this, 11, "", wxPoint(600, 200), wxSize(100, 20), 16384L, 0, 100);
-	c3 = new wxSpinCtrl(this, 12, "", wxPoint(600, 400), wxSize(100, 20), 16384L, 0, 100);
+	static wxPanel* panel = new wxPanel(this, 222, { 600, 0 }, {300, 1000});
+
+	m_sliders.push_back(new wxSlider(panel, Option1, 256, 0, 256, {0, 0}));
+	m_sliders.back()->SetLabelText("R");
+	m_sliders.back()->Bind(wxEVT_SLIDER, &MyFrame::SliderChanged, this, Option1);
+
+	m_sliders.push_back(new wxSlider(panel, Option2, 256, 0, 256, { 0, 100 }));
+	m_sliders.back()->SetLabelText("G");
+	m_sliders.back()->Bind(wxEVT_SLIDER, &MyFrame::SliderChanged, this, Option2);
+
+	m_sliders.push_back(new wxSlider(panel, Option3, 256, 0, 256, { 0, 200 }));
+	m_sliders.back()->SetLabelText("B");
+	m_sliders.back()->Bind(wxEVT_SLIDER, &MyFrame::SliderChanged, this, Option3);
+
+	m_sliders.push_back(new wxSlider(panel, Option4, 256, 0, 256, { 0, 300 }));
+	m_sliders.back()->SetLabelText("A");
+	m_sliders.back()->Bind(wxEVT_SLIDER, &MyFrame::SliderChanged, this, Option4);
 
 	m_imagePanel = new wxPanel(this);
 }
 
+
+void MyFrame::SliderChanged(wxCommandEvent& event)
+{
+	auto id = event.GetId() - Option1;
+	ApplyRGBA(m_mainImageData, id, m_sliders[id]->GetValue());
+	SetImage(&m_mainImageData);
+}
 
 void MyFrame::OnHello(wxCommandEvent& event)
 {
@@ -117,12 +144,8 @@ void MyFrame::RunFilter(wxCommandEvent& event)
 	
 	}break;
 	case Filter4: {
-	
-		float pR = float(c1->GetValue()) / 100.0f;
-		float pG = float(c2->GetValue()) / 100.0f;
-		float pB = float(c3->GetValue()) / 100.0f;
 
-		RecolorOfGrayAndWhite(m_mainImageData, pR, pG, pB, 1);
+		//RecolorOfGrayAndWhite(m_mainImageData, pR, pG, pB, 1);
 
 	}break;
 	default:

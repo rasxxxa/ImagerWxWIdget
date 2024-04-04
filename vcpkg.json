@@ -2,6 +2,8 @@
   "name": "imager",
   "version-string": "00000",
   "dependencies": [
-    "wxwidgets"
+    {
+      "name" : "wxwidgets"
+    }
   ]
 }

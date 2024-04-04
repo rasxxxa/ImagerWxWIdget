@@ -98,6 +98,45 @@ export
 		matrix = MATRIX(m);
 	}
 
+	void ApplyRGBA(Image& image, unsigned element, unsigned value)
+	{
+		const float formattedValue = static_cast<float>(value) / 256.0f;
+		MATRIX m = RawImageHandler::CreateMatrixFromImage(image);
+		for (size_t x = 0; x < m.size(); x++)
+		{
+			for (size_t y = 0; y < m[0].size(); y++)
+			{
+				switch (element)
+				{
+				case 0: {
+				
+					m[x][y].R *= formattedValue;
+
+				} break;
+				case 1: {
+				
+					m[x][y].G *= formattedValue;
+
+
+				} break;
+				case 2: {
+				
+					m[x][y].B *= formattedValue;
+
+				
+				} break;
+				case 3: {
+				
+					m[x][y].A *= formattedValue;
+				
+				} break;
+				}
+			}
+		}
+
+		image.m_imageData = RawImageHandler::CreateImageFromMatrix(m);
+	}
+
 	using MatrixFunc = std::function<void(Image&, unsigned, unsigned, unsigned, unsigned, unsigned, MATRIX&)>;
 	using ArrayFunc = std::function<void(Image&, unsigned, unsigned, unsigned)>;
 

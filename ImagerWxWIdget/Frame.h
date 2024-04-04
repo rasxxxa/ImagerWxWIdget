@@ -18,7 +18,11 @@ enum
 	Filter1 = 3,
 	Filter2 = 4,
 	Filter3 = 5,
-	Filter4 = 6
+	Filter4 = 6,
+	Option1 = 1000,
+	Option2,
+	Option3,
+	Option4,
 };
 
 class MyFrame : public wxFrame
@@ -26,13 +30,14 @@ class MyFrame : public wxFrame
 public:
 	MyFrame();
 private:
-	wxSpinCtrl* c1, * c2, *c3;
+	std::vector<wxSlider*> m_sliders;
 	wxImage m_mainImage;
 	wxBitmap m_mainBitmap;
 	wxStaticBitmap* m_staticBitmap;
 	wxPanel* m_imagePanel;
 	RawImageHandler m_mainImageHandler{};
 	Image m_mainImageData{};
+	void SliderChanged(wxCommandEvent& event);
 	void OnHello(wxCommandEvent& event);
 	void OnAbout(wxCommandEvent& event);
 	void OnExit(wxCommandEvent& event);
