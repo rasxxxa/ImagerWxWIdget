@@ -31,12 +31,16 @@ MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "HELLO WORLD", wxPoint(0, 0), wx
 	menuOptions->Append(Option3, "&Option 3");
 	menuOptions->Append(Option4, "&Option 4");
 
+	wxMenu* saveMenu = new wxMenu;
+	saveMenu->Append(Save, "&Save");
+
 	wxMenuBar* menuBar = new wxMenuBar;
 	menuBar->Append(menuFile, "&File");
 	menuBar->Append(menuHelp, "&Help");
 	menuBar->Append(menuOpenFile, "&Open File");
 	menuBar->Append(menuFilters, "&Filters");
 	menuBar->Append(menuOptions, "&Options");
+	menuBar->Append(saveMenu, "&Save");
 
 	SetMenuBar(menuBar);
 	CreateStatusBar();
@@ -50,23 +54,24 @@ MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "HELLO WORLD", wxPoint(0, 0), wx
 	Bind(wxEVT_MENU, &MyFrame::RunFilter, this, Filter2);
 	Bind(wxEVT_MENU, &MyFrame::RunFilter, this, Filter3);
 	Bind(wxEVT_MENU, &MyFrame::RunFilter, this, Filter4);
+	Bind(wxEVT_MENU, &MyFrame::SaveFile, this, Save);
 
 	static wxPanel* panel = new wxPanel(this, 222, { 600, 0 }, {300, 1000});
 
-	int defaultValue = 256;
-	m_sliders.push_back({ new wxSlider(panel, Option1, defaultValue, 0, 256, {0, 0}), defaultValue });
+	int defaultValue = 0;
+	m_sliders.push_back({ new wxSlider(panel, Option1, defaultValue, -255, 255, {0, 0}), defaultValue });
 	m_sliders.back().first->SetLabelText("R");
 	m_sliders.back().first->Bind(wxEVT_SLIDER, &MyFrame::SliderChanged, this, Option1);
 
-	m_sliders.push_back({ new wxSlider(panel, Option2, 256, 0, 256, { 0, 100 }), defaultValue });
+	m_sliders.push_back({ new wxSlider(panel, Option2, defaultValue, -255, 255, { 0, 100 }), defaultValue });
 	m_sliders.back().first->SetLabelText("G");
 	m_sliders.back().first->Bind(wxEVT_SLIDER, &MyFrame::SliderChanged, this, Option2);
 
-	m_sliders.push_back({new wxSlider(panel, Option3, 256, 0, 256, { 0, 200 }), defaultValue});
+	m_sliders.push_back({new wxSlider(panel, Option3, defaultValue, -255, 255, { 0, 200 }), defaultValue});
 	m_sliders.back().first->SetLabelText("B");
 	m_sliders.back().first->Bind(wxEVT_SLIDER, &MyFrame::SliderChanged, this, Option3);
 
-	m_sliders.push_back({ new wxSlider(panel, Option4, 256, 0, 256, { 0, 300 }), defaultValue });
+	m_sliders.push_back({ new wxSlider(panel, Option4, defaultValue, -255, 255, { 0, 300 }), defaultValue });
 	m_sliders.back().first->SetLabelText("A");
 	m_sliders.back().first->Bind(wxEVT_SLIDER, &MyFrame::SliderChanged, this, Option4);
 
@@ -77,7 +82,7 @@ MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "HELLO WORLD", wxPoint(0, 0), wx
 void MyFrame::SliderChanged(wxCommandEvent& event)
 {
 	auto id = event.GetId() - Option1;
-	Operation operation = m_sliders[id].second > m_sliders[id].first->GetValue() ? Operation::Mult : Operation::Divide;
+	Operation operation = m_sliders[id].second > m_sliders[id].first->GetValue() ? Operation::Bigger : Operation::Smaller;
 	ApplyRGBA(m_mainImageData, id, m_sliders[id].first->GetValue(), operation);
 	m_sliders[id].second = m_sliders[id].first->GetValue();
 	SetImage(&m_mainImageData);
@@ -159,7 +164,24 @@ void MyFrame::RunFilter(wxCommandEvent& event)
 	SetImage();
 }
 
+
+
 #include <filesystem>
+
+void MyFrame::SaveFile(wxCommandEvent& event)
+{
+	wxString wildcard = "Image Files (*.jpg;*.png;*.bmp)|*.jpg;*.png;*.bmp";
+	wxFileDialog openFileDialog(this, "Save File", "", "", wildcard, wxFD_SAVE);
+
+	// Show the file dialog
+	if (openFileDialog.ShowModal() == wxID_OK)
+	{
+		// Get the selected file path
+		wxString filePath = openFileDialog.GetPath();
+		m_mainImageHandler.WriteImage(m_mainImageData, filePath.utf8_str().data());
+	}
+}
+
 
 void MyFrame::SetImage(Image* image)
 {

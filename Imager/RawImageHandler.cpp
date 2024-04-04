@@ -42,6 +42,10 @@
     im.m_width = width;
     im.m_size = height * width * channels;
     im.m_imageData = std::vector<unsigned char>(image, image + im.m_size);
+    im.m_imageDataCopy.resize(im.m_imageData.size());
+    for (auto elem = 0; elem < im.m_imageData.size(); elem++)
+        im.m_imageDataCopy[elem] = im.m_imageData[elem];
+
     im.type = type;
     im.path = path;
 
@@ -49,10 +53,10 @@
     return im;
 }
 
-bool RawImageHandler::WriteImage(const Image& image) const
+bool RawImageHandler::WriteImage(const Image& image, std::optional<std::string> path) const
 {
     static unsigned serial = 0;
-    std::string withExt = image.path;
+    std::string withExt = path.value_or(image.path);
     withExt.insert(withExt.size() - 4, std::to_string(serial++).data());
     switch (image.type)
     {

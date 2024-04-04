@@ -2,12 +2,14 @@
 #include <thread>
 #include <cassert>
 #include <functional>
+#include <algorithm>
 
 
 export module Filters;
 std::atomic_int it = 0;
 export
 {
+	enum class Operation {Bigger, Smaller};
 	constexpr size_t MAX_NUMBER_OF_THREADS = 4;
 
 	void GrayFilter(Image& image, unsigned left, unsigned right, unsigned bitOffset)
@@ -98,43 +100,13 @@ export
 		matrix = MATRIX(m);
 	}
 
-	void ApplyRGBA(Image& image, unsigned element, unsigned value)
-	{
-		const float formattedValue = static_cast<float>(value) / 256.0f;
-		MATRIX m = RawImageHandler::CreateMatrixFromImage(image);
-		for (size_t x = 0; x < m.size(); x++)
+	void ApplyRGBA(Image& image, unsigned element, unsigned value, Operation operation)
+	{	
+		for (size_t elem = 0; elem < image.m_imageData.size(); elem += image.m_channels)
 		{
-			for (size_t y = 0; y < m[0].size(); y++)
-			{
-				switch (element)
-				{
-				case 0: {
-				
-					m[x][y].R *= formattedValue;
-
-				} break;
-				case 1: {
-				
-					m[x][y].G *= formattedValue;
-
-
-				} break;
-				case 2: {
-				
-					m[x][y].B *= formattedValue;
-
-				
-				} break;
-				case 3: {
-				
-					m[x][y].A *= formattedValue;
-				
-				} break;
-				}
-			}
+			int valueFormatted = image.m_imageDataCopy[elem + element] + value;
+			image.m_imageData[elem + element] = std::clamp(valueFormatted, 0, 256);
 		}
-
-		image.m_imageData = RawImageHandler::CreateImageFromMatrix(m);
 	}
 
 	using MatrixFunc = std::function<void(Image&, unsigned, unsigned, unsigned, unsigned, unsigned, MATRIX&)>;

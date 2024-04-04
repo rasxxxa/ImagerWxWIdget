@@ -23,6 +23,7 @@ enum
 	Option2,
 	Option3,
 	Option4,
+	Save,
 };
 
 class MyFrame : public wxFrame
@@ -43,6 +44,7 @@ private:
 	void OnExit(wxCommandEvent& event);
 	void OnClickHandler(wxCommandEvent& event);
 	void OpenFile(wxCommandEvent& event);
+	void SaveFile(wxCommandEvent& event);
 	void RunFilter(wxCommandEvent& event);
 	void SetImage(Image* image = nullptr);
 };
