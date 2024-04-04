@@ -1,3 +1,4 @@
+import Filters;
 #include "Frame.h"
 #include "../Imager/RawImageHandler.h"
 #include "wx/spinctrl.h"
@@ -52,21 +53,22 @@ MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "HELLO WORLD", wxPoint(0, 0), wx
 
 	static wxPanel* panel = new wxPanel(this, 222, { 600, 0 }, {300, 1000});
 
-	m_sliders.push_back(new wxSlider(panel, Option1, 256, 0, 256, {0, 0}));
-	m_sliders.back()->SetLabelText("R");
-	m_sliders.back()->Bind(wxEVT_SLIDER, &MyFrame::SliderChanged, this, Option1);
+	int defaultValue = 256;
+	m_sliders.push_back({ new wxSlider(panel, Option1, defaultValue, 0, 256, {0, 0}), defaultValue });
+	m_sliders.back().first->SetLabelText("R");
+	m_sliders.back().first->Bind(wxEVT_SLIDER, &MyFrame::SliderChanged, this, Option1);
 
-	m_sliders.push_back(new wxSlider(panel, Option2, 256, 0, 256, { 0, 100 }));
-	m_sliders.back()->SetLabelText("G");
-	m_sliders.back()->Bind(wxEVT_SLIDER, &MyFrame::SliderChanged, this, Option2);
+	m_sliders.push_back({ new wxSlider(panel, Option2, 256, 0, 256, { 0, 100 }), defaultValue });
+	m_sliders.back().first->SetLabelText("G");
+	m_sliders.back().first->Bind(wxEVT_SLIDER, &MyFrame::SliderChanged, this, Option2);
 
-	m_sliders.push_back(new wxSlider(panel, Option3, 256, 0, 256, { 0, 200 }));
-	m_sliders.back()->SetLabelText("B");
-	m_sliders.back()->Bind(wxEVT_SLIDER, &MyFrame::SliderChanged, this, Option3);
+	m_sliders.push_back({new wxSlider(panel, Option3, 256, 0, 256, { 0, 200 }), defaultValue});
+	m_sliders.back().first->SetLabelText("B");
+	m_sliders.back().first->Bind(wxEVT_SLIDER, &MyFrame::SliderChanged, this, Option3);
 
-	m_sliders.push_back(new wxSlider(panel, Option4, 256, 0, 256, { 0, 300 }));
-	m_sliders.back()->SetLabelText("A");
-	m_sliders.back()->Bind(wxEVT_SLIDER, &MyFrame::SliderChanged, this, Option4);
+	m_sliders.push_back({ new wxSlider(panel, Option4, 256, 0, 256, { 0, 300 }), defaultValue });
+	m_sliders.back().first->SetLabelText("A");
+	m_sliders.back().first->Bind(wxEVT_SLIDER, &MyFrame::SliderChanged, this, Option4);
 
 	m_imagePanel = new wxPanel(this);
 }
@@ -75,7 +77,9 @@ MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "HELLO WORLD", wxPoint(0, 0), wx
 void MyFrame::SliderChanged(wxCommandEvent& event)
 {
 	auto id = event.GetId() - Option1;
-	ApplyRGBA(m_mainImageData, id, m_sliders[id]->GetValue());
+	Operation operation = m_sliders[id].second > m_sliders[id].first->GetValue() ? Operation::Mult : Operation::Divide;
+	ApplyRGBA(m_mainImageData, id, m_sliders[id].first->GetValue(), operation);
+	m_sliders[id].second = m_sliders[id].first->GetValue();
 	SetImage(&m_mainImageData);
 }
 

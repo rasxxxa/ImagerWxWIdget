@@ -30,7 +30,7 @@ class MyFrame : public wxFrame
 public:
 	MyFrame();
 private:
-	std::vector<wxSlider*> m_sliders;
+	std::vector<std::pair<wxSlider*, int>> m_sliders;
 	wxImage m_mainImage;
 	wxBitmap m_mainBitmap;
 	wxStaticBitmap* m_staticBitmap;
